@@ -55,6 +55,11 @@ data "aws_iam_policy_document" "allow_object_read" {
   }
 }
 
+resource "aws_s3_bucket_policy" "allow_public_read_policy" {
+  bucket = aws_s3_bucket.website_bucket.id
+  policy = data.aws_iam_policy_document.allow_object_read.json
+}
+
 resource "aws_route53_record" "journey" {
   zone_id = "Z08238352NOVWWT6JWSWJ"
   name    = "journey"
