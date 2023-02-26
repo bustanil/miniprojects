@@ -33,3 +33,15 @@ resource "aws_s3_bucket_acl" "website_bucket_acl" {
   bucket = aws_s3_bucket.website_bucket.bucket
   acl    = "public-read"
 }
+
+resource "aws_route53_record" "journey" {
+  zone_id = "Z08238352NOVWWT6JWSWJ"
+  name    = "journey"
+  type    = "A"
+
+  alias {
+    name                   = aws_s3_bucket.website_bucket.website_endpoint
+    zone_id                = aws_s3_bucket.website_bucket.hosted_zone_id
+    evaluate_target_health = true
+  }
+}
