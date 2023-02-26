@@ -34,6 +34,27 @@ resource "aws_s3_bucket_acl" "website_bucket_acl" {
   acl    = "public-read"
 }
 
+resource "aws_s3_bucket_website_configuration" "journey_web_config" {
+  bucket = aws_s3_bucket.website_bucket.id
+  index_document {
+    suffix = "index.html"
+  }
+}
+
+data "aws_iam_policy_document" "allow_object_read" {
+  statement {
+    
+    principals {
+      type = "AWS"
+      identifiers = ["*"]
+    }
+
+    actions = ["s3:GetObject"]
+
+    resources = ["${aws_s3_bucket.website_bucket.arn}/*"]
+  }
+}
+
 resource "aws_route53_record" "journey" {
   zone_id = "Z08238352NOVWWT6JWSWJ"
   name    = "journey"
@@ -46,11 +67,3 @@ resource "aws_route53_record" "journey" {
   }
 }
 
-resource "aws_s3_bucket_website_configuration" "journey_web_config" {
-  bucket = aws_s3_bucket.website_bucket.id
-  index_document {
-    suffix = "index.html"
-  }
-}
-
-// TODO bucket policy
