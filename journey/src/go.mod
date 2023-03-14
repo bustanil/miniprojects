@@ -2,7 +2,7 @@ module bustanil/journey
 
 go 1.20
 
-require rsc.io/quote v1.5.2
+// require rsc.io/quote v1.5.2
 
 require (
 	github.com/yuin/goldmark v1.5.4
