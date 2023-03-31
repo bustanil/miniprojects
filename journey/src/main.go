@@ -13,15 +13,27 @@ import (
 	"github.com/yuin/goldmark"
 )
 
-var template string = `
+// TODO extract the postTemplate into a separate file
+var postTemplate string = `
 <html>
   <head>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css">
   </head>
   <body>
     %s
   </body>
 </html>
 `
+
+var postListTemplate string = `
+<html>
+  <head>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css">
+  </head>
+  <body>
+    %s 
+  </body>
+</html> `
 
 type BlogEntry struct {
   title string
@@ -54,25 +66,17 @@ func main() {
       year := matches[re.SubexpIndex("Year")]
       filename := matches[re.SubexpIndex("Filename")]
       title := strings.ReplaceAll(filename, "-", "")
-      createdDate, err := time.Parse("1-2-2006", fmt.Sprintf("%s-%s-%s", day, month, year))
+      createdDate, err := time.Parse("02-01-2006", fmt.Sprintf("%s-%s-%s", day, month, year))
       if err != nil {
         fmt.Println("error", err)
         return err
       }
 
-      blog := BlogEntry{
-        title: title,
-        path: subDirPath,
-        createdDate: createdDate,
-      }
-
-      var bs, err = ioutil.ReadFile(path)
+      bs, err := ioutil.ReadFile(path)
       if err != nil {
         fmt.Println("error", err)
         return err
       }
-
-      blogs = append(blogs, blog)
 
       // for each markdown file, generate the HTML page
       fmt.Printf(`input: %s, output: %s\n`, input, output)
@@ -80,11 +84,20 @@ func main() {
       if err := goldmark.Convert(bs, &buf); err != nil {
         panic(err)
       }
-      out := fmt.Sprintf(template, string(buf.Bytes()))
-      outputDir := fmt.Sprintf("/%s/%s/%s/%s", output, year, month, day)
+      out := fmt.Sprintf(postTemplate, string(buf.Bytes()))
+      outputSubDir := fmt.Sprintf("/%s/%s/%s", year, month, day)
+      outputDir := fmt.Sprintf("/%s/%s", output, outputSubDir)
       outputPath := fmt.Sprintf("/%s/%s.html", outputDir, filename)
+      relativePath := fmt.Sprintf("%s/%s.html", outputSubDir, filename)
+
+      blog := BlogEntry{
+        title: title,
+        createdDate: createdDate,
+        path: relativePath,
+      }
+      blogs = append(blogs, blog)
+
       os.MkdirAll(outputDir, 0777)
-      fmt.Println(outputPath)
       err = ioutil.WriteFile(outputPath, []byte(out), 0766)
       if err != nil {
         fmt.Println("error", err)
@@ -93,6 +106,15 @@ func main() {
       fmt.Println(blogs)
 		}
 
+    // generate the post list
+    var posts string = ""
+    for _, blog := range blogs {
+      fmt.Println(blog.path)
+      var row = fmt.Sprintf(`<div><a href="%s">%s (%s)</a></div>`, blog.path[1:len(blog.path)], blog.title, blog.createdDate)
+      posts = posts + row
+    }
+
+    ioutil.WriteFile(fmt.Sprintf("%s/index.html", output), []byte(fmt.Sprintf(postListTemplate, posts)), 0766)
 
 		return nil
 	})
