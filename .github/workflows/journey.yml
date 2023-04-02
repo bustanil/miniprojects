@@ -27,4 +27,4 @@ jobs:
     - name: Generate Blog
       run: ./journey/src/journey ./journey/posts ./journey/out "My Blog"
   
-    - run: ls .journey/out
+    - run: ls ./journey/out
