@@ -25,6 +25,6 @@ jobs:
       run: cd journey/src && go build -v
       
     - name: Generate Blog
-      run: ./journey ../posts ../out "My Blog"
+      run: ./journey/src/journey ./journey/posts ./journey/out "My Blog"
   
-    - run: ls ../out
+    - run: ls .journey/out
