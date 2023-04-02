@@ -9,7 +9,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-  "time"
+	"time"
+
 	"github.com/yuin/goldmark"
 )
 
@@ -17,10 +18,13 @@ import (
 var postTemplate string = `
 <html>
   <head>
+    <title>%s</title>
     <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css">
   </head>
   <body>
-    %s
+    <article>
+      %s
+    </article>
   </body>
 </html>
 `
@@ -28,10 +32,15 @@ var postTemplate string = `
 var postListTemplate string = `
 <html>
   <head>
+    <title>%s</title>
     <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css">
   </head>
   <body>
-    %s 
+    <article>
+      <h2>%s</h2>
+      <hr />
+      %s 
+    </article>
   </body>
 </html> `
 
@@ -50,7 +59,7 @@ func main() {
 	args := os.Args
 	input := args[1]
 	output := args[2]
-
+  title := args[3]
 
   blogs := make([]BlogEntry, 0)
 
@@ -79,16 +88,16 @@ func main() {
       }
 
       // for each markdown file, generate the HTML page
-      fmt.Printf(`input: %s, output: %s\n`, input, output)
+      fmt.Printf(`input: %s, output: %s`, input, output)
       var buf bytes.Buffer
       if err := goldmark.Convert(bs, &buf); err != nil {
         panic(err)
       }
-      out := fmt.Sprintf(postTemplate, string(buf.Bytes()))
+      out := fmt.Sprintf(postTemplate, title, (buf.Bytes()))
       outputSubDir := fmt.Sprintf("/%s/%s/%s", year, month, day)
       outputDir := fmt.Sprintf("/%s/%s", output, outputSubDir)
       outputPath := fmt.Sprintf("/%s/%s.html", outputDir, filename)
-      relativePath := fmt.Sprintf("%s/%s.html", outputSubDir, filename)
+      relativePath := fmt.Sprintf("%s/%s.html", outputSubDir[1:], filename)
 
       blog := BlogEntry{
         title: title,
@@ -103,18 +112,16 @@ func main() {
         fmt.Println("error", err)
         return err
       }
-      fmt.Println(blogs)
 		}
 
     // generate the post list
     var posts string = ""
     for _, blog := range blogs {
-      fmt.Println(blog.path)
-      var row = fmt.Sprintf(`<div><a href="%s">%s (%s)</a></div>`, blog.path[1:len(blog.path)], blog.title, blog.createdDate)
+      var row = fmt.Sprintf(`<div><a href="%s">%s (%s)</a></div>`, blog.path, blog.title, blog.createdDate.Format("02-01-2006"))
       posts = posts + row
     }
 
-    ioutil.WriteFile(fmt.Sprintf("%s/index.html", output), []byte(fmt.Sprintf(postListTemplate, posts)), 0766)
+    ioutil.WriteFile(fmt.Sprintf("%s/index.html", output), []byte(fmt.Sprintf(postListTemplate, title, title, posts)), 0766)
 
 		return nil
 	})
