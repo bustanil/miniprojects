@@ -76,7 +76,7 @@ func main() {
       month := matches[re.SubexpIndex("Month")]
       year := matches[re.SubexpIndex("Year")]
       filename := matches[re.SubexpIndex("Filename")]
-      title := strings.ReplaceAll(filename, "-", "")
+      title := strings.ReplaceAll(filename, "-", " ")
       createdDate, err := time.Parse("02-01-2006", fmt.Sprintf("%s-%s-%s", day, month, year))
       if err != nil {
         fmt.Println("error", err)
@@ -97,10 +97,10 @@ func main() {
       }
       content := fmt.Sprintf(postTemplate, title, (buf.Bytes()))
 
-      outputSubDir := fmt.Sprintf("/%s/%s/%s", year, month, day)
-      outputDir := fmt.Sprintf("/%s/%s", output, outputSubDir)
-      outputPath := fmt.Sprintf("/%s/%s.html", outputDir, filename)
-      relativePath := fmt.Sprintf("%s/%s.html", outputSubDir[1:], filename)
+      outputSubDir := fmt.Sprintf("%s/%s/%s", year, month, day)
+      outputDir := fmt.Sprintf("%s/%s", output, outputSubDir)
+      outputPath := fmt.Sprintf("%s/%s.html", outputDir, filename)
+      relativePath := fmt.Sprintf("%s/%s.html", outputSubDir, filename)
 
       blog := BlogEntry{
         title: title,
