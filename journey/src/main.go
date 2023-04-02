@@ -69,6 +69,8 @@ func main() {
 	filepath.WalkDir(input, func(path string, d fs.DirEntry, err error) error {
 		subDirPath := strings.ReplaceAll(path, rootFilePath, "")
 		if EndsWith(d.Name(), ".md") {
+
+      // validate and parse the file path
       matches := re.FindStringSubmatch(subDirPath)
       day := matches[re.SubexpIndex("Day")]
       month := matches[re.SubexpIndex("Month")]
@@ -93,7 +95,8 @@ func main() {
       if err := goldmark.Convert(bs, &buf); err != nil {
         panic(err)
       }
-      out := fmt.Sprintf(postTemplate, title, (buf.Bytes()))
+      content := fmt.Sprintf(postTemplate, title, (buf.Bytes()))
+
       outputSubDir := fmt.Sprintf("/%s/%s/%s", year, month, day)
       outputDir := fmt.Sprintf("/%s/%s", output, outputSubDir)
       outputPath := fmt.Sprintf("/%s/%s.html", outputDir, filename)
@@ -106,8 +109,9 @@ func main() {
       }
       blogs = append(blogs, blog)
 
+      // write the HTML page
       os.MkdirAll(outputDir, 0777)
-      err = ioutil.WriteFile(outputPath, []byte(out), 0766)
+      err = ioutil.WriteFile(outputPath, []byte(content), 0766)
       if err != nil {
         fmt.Println("error", err)
         return err
