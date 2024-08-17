@@ -15,7 +15,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "website_bucket" {
-  bucket = "journey.bustanil.io"
+  bucket = "blog.bustanil.com"
 
   tags = {
     purpose = "miniproject"
