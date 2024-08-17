@@ -15,11 +15,19 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "website_bucket" {
-  bucket = "journey.bustanil.com"
+  bucket = "journey.bustanil.io"
 
   tags = {
     purpose = "miniproject"
   }
+}
+
+resource "aws_s3_bucket_public_access_block" "unblock_public_access" {
+  bucket = aws_s3_bucket.website_bucket.id
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
 }
 
 resource "aws_s3_bucket_website_configuration" "website_config" {
@@ -27,11 +35,6 @@ resource "aws_s3_bucket_website_configuration" "website_config" {
   index_document {
     suffix = "index.html"
   }
-}
-
-resource "aws_s3_bucket_acl" "website_bucket_acl" {
-  bucket = aws_s3_bucket.website_bucket.bucket
-  acl    = "public-read"
 }
 
 resource "aws_s3_bucket_website_configuration" "journey_web_config" {
@@ -59,16 +62,3 @@ resource "aws_s3_bucket_policy" "allow_public_read_policy" {
   bucket = aws_s3_bucket.website_bucket.id
   policy = data.aws_iam_policy_document.allow_object_read.json
 }
-
-resource "aws_route53_record" "journey" {
-  zone_id = "Z08238352NOVWWT6JWSWJ"
-  name    = "journey"
-  type    = "A"
-
-  alias {
-    name                   =  aws_s3_bucket_website_configuration.website_config.website_domain
-    zone_id                = aws_s3_bucket.website_bucket.hosted_zone_id
-    evaluate_target_health = false
-  }
-}
-
